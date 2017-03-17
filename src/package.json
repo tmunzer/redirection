@@ -1,0 +1,13 @@
+{
+  "name": "base",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "body-parser": "~1.15.2",
+    "debug": "~2.2.0",
+    "express": "~4.14.0",
+    "morgan": "^1.8.1",
+    "serve-favicon": "~2.3.0",
+    "winston": "^2.3.0"
+  }
+}
