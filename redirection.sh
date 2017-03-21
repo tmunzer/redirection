@@ -44,10 +44,10 @@ function create_app_container
 # =========================================================
 # =========================================================
 SCRIPT_CONF=`pwd`"/ah-ref-app.conf"
-SCRIPT_NAME="redirect"
+SCRIPT_NAME="redirection"
 
-APP_NAME="redirect"
-APP_IMG="redirect"
+APP_NAME="redirection"
+APP_IMG="tmunzer/redirection"
 OAUTH_CALLBACK="oauth/reg"
 APP_CNF_LOC="/app"
 
@@ -442,26 +442,35 @@ function menu_certificates
 ################################################################################
 ############################    CREATE DOCKER IMAGES
 ################################################################################
-function create_app_image
+function pull_image # $Xx_IMG
 {
-   echo ""
-   if [ `$DOCKER images | cut -d" " -f1 | grep ^$APP_IMG$ | wc -l` -eq 0 ]
-   then
-       echo -e "${INFOC}INFO${NC}: $APP_IMG image is not present. Creating it..."
-       cd $APP_NAME
-       ls
-       chmod a+x ./build.sh
-       ./build.sh
-       cd ..
-       if [ $? -eq 0 ]
-       then
-	   echo -e "${INFOC}INFO${NC}: $APP_IMG image is now created."
-       else
-	   echo -e "${ERRORC}ERROR${NC}: $APP_IMG image can't be created."
-       fi
-   else
-       echo -e "${INFOC}INFO${NC}: $APP_IMG image is already installed."
-   fi
+    echo ""
+    if [ `$DOCKER images | cut -d" " -f1 | grep $1$ | wc -l` -eq 0 ]
+    then
+	echo -e "${INFOC}INFO${NC}: $1 image is not present. Installing it..."
+	$DOCKER pull $1
+	if [ $? -eq 0 ]
+	then
+	    echo -e "${INFOC}INFO${NC}: $1 image is now installed."
+	else
+	    echo -e "${ERRORC}ERROR${NC}: $1 image can't be installed."
+	fi
+    else
+	echo -e "${INFOC}INFO${NC}: $1 image is already installed."
+    fi
+}
+
+function check_image #$XX_IMG
+{
+  echo ""
+  if [ `$DOCKER images | grep "$1" | wc -l` -eq 0 ]
+  then
+    echo -e "${WARNINGC}WARNING${NC}: Docker Image $1 is not installed."
+    echo "         Please deploy all the needed images to run the Application"
+    echo "         in a Docker environment."
+  else
+    echo -e "${INFOC}INFO${NC}: Docker Image $1 is installed"
+  fi
 }
 
 function check_image #$XX_IMG
@@ -490,7 +499,7 @@ function menu_images
     echo "Please make a choice"
     read response
     case $response in
-      "1") create_app_image;;
+      "1") pull_image $APP_IMG;;
       "2") $DOCKER rmi $APP_IMG;;
       "4") check_image $APP_IMG;;
     esac
@@ -638,7 +647,7 @@ function menu_containers
 ################################################################################
 function auto_deploy
 {
-  create_app_image
+  pull_image $APP_IMG
   create_app_container $APP_NAME $DB_NAME $VHOST
   start_container $APP_NAME
 }
@@ -673,7 +682,7 @@ function update_app
   stop_container $APP_NAME
   remove_container $APP_NAME
   $DOCKER rmi $APP_NAME
-  create_app_image
+  pull_image $APP_IMG
   create_app_container
   start_container $APP_NAME
 }
