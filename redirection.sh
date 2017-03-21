@@ -17,7 +17,7 @@ function create_app_container
     echo "INFO: $APP_NAME container not present. Creating it..."
     $DOCKER create \
     --name $APP_NAME \
-    -v /home/tmunzer/shared/redirect:/app:z \
+    -v $PERSISTANT_FOLDER/$APP_NAME/config.js:/app/config.js:ro \
     --memory=32m \
     -e "VIRTUAL_HOST=$NODEJS_VHOST" \
     -e "LETSENCRYPT_HOST=$NODEJS_VHOST" \
